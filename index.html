@@ -1,67 +1,82 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Music Player</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(#1e1e1e, #000);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<meta charset="UTF-8">
+<title>Spotify Style Player</title>
 
-    .player {
-      width: 300px;
-      text-align: center;
-    }
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+  }
 
-    .cover {
-      width: 100%;
-      border-radius: 10px;
-    }
+  /* Background blur */
+  .bg {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(25px) brightness(0.4);
+    transform: scale(1.2);
+    z-index: -1;
+  }
 
-    h2 {
-      margin: 10px 0 0;
-    }
+  .player {
+    width: 300px;
+    margin: auto;
+    text-align: center;
+    color: white;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+  }
 
-    p {
-      color: #aaa;
-      margin: 5px 0 15px;
-    }
+  .cover {
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
 
-    .controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      margin-top: 10px;
-    }
+  h2 {
+    margin: 15px 0 5px;
+  }
 
-    button {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-    }
+  p {
+    color: #ccc;
+  }
 
-    input[type="range"] {
-      width: 100%;
-      margin-top: 10px;
-    }
+  input[type="range"] {
+    width: 100%;
+    margin-top: 10px;
+  }
 
-    .upload {
-      margin-top: 15px;
-      font-size: 12px;
-    }
-  </style>
+  .controls {
+    margin-top: 15px;
+  }
+
+  button {
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .upload {
+    margin-top: 20px;
+    font-size: 12px;
+  }
+</style>
 </head>
+
 <body>
+
+<div class="bg" id="bg"></div>
 
 <div class="player">
   <img id="cover" class="cover" src="cover.jpg">
@@ -72,7 +87,7 @@
   <input type="range" id="progress" value="0">
 
   <div class="controls">
-    <button onclick="togglePlay()">▶️</button>
+    <button onclick="togglePlay()">▶</button>
   </div>
 
   <audio id="audio" src="music.mp3"></audio>
@@ -87,6 +102,10 @@
 const audio = document.getElementById("audio");
 const progress = document.getElementById("progress");
 const cover = document.getElementById("cover");
+const bg = document.getElementById("bg");
+
+// Set background awal
+bg.style.backgroundImage = `url(${cover.src})`;
 
 function togglePlay() {
   if (audio.paused) {
@@ -96,12 +115,12 @@ function togglePlay() {
   }
 }
 
-// Update progress bar
+// Update progress
 audio.addEventListener("timeupdate", () => {
-  progress.value = (audio.currentTime / audio.duration) * 100;
+  progress.value = (audio.currentTime / audio.duration) * 100 || 0;
 });
 
-// Seek lagu
+// Seek
 progress.addEventListener("input", () => {
   audio.currentTime = (progress.value / 100) * audio.duration;
 });
@@ -114,11 +133,13 @@ document.getElementById("musicUpload").addEventListener("change", function(e) {
   }
 });
 
-// Upload gambar
+// Upload gambar + update background
 document.getElementById("imageUpload").addEventListener("change", function(e) {
   const file = e.target.files[0];
   if (file) {
-    cover.src = URL.createObjectURL(file);
+    const url = URL.createObjectURL(file);
+    cover.src = url;
+    bg.style.backgroundImage = `url(${url})`;
   }
 });
 </script>
