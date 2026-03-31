@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Music Player</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .anime-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.7;
+        }
+        
+        .anime-background img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .music-player {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            width: 350px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        
+        .player-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ff6b9d;
+            text-shadow: 0 0 10px #ff6b9d;
+        }
+        
+        .cover-art {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            object-fit: cover;
+            border: 3px solid #ff6b9d;
+            box-shadow: 0 0 20px rgba(255, 107, 157, 0.5);
+            animation: rotate 20s linear infinite;
+            animation-play-state: paused;
+        }
+        
+        .music-player.playing .cover-art {
+            animation-play-state: running;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .song-info {
+            margin-bottom: 20px;
+        }
+        
+        .song-title {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .artist {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .control-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            margin: 0 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            color: #ff6b9d;
+            transform: scale(1.2);
+        }
+        
+        .play-btn {
+            font-size: 40px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 5px;
+            background-color: #333;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #ff6b9d;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .playlist {
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .playlist-item {
+            padding: 8px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .playlist-item:hover {
+            background-color: rgba(255, 107, 157, 0.2);
+        }
+        
+        .playlist-item.active {
+            color: #ff6b9d;
+            font-weight: bold;
+        }
+        
+        /* Scrollbar styling */
+        .playlist::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        .playlist::-webkit-scrollbar-track {
+            background: #333;
+        }
+        
+        .playlist::-webkit-scrollbar-thumb {
+            background: #ff6b9d;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="anime-background">
+        <!-- Anda bisa mengganti dengan gambar anime favorit -->
+        <img src="https://files.catbox.moe/ffl2uf.jpg" alt="Anime Background">
+    </div>
+    
+    <div class="music-player">
+        <h1 class="player-title">Anime Music Player</h1>
+        
+        <img src="https://i1.sndcdn.com/artworks-000123456789-abcdef-t500x500.jpg" alt="Cover Art" class="cover-art">
+        
+        <div class="song-info">
+            <div class="song-title">Anime Opening Song</div>
+            <div class="artist">Anime Artist</div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="time-info">
+            <span class="current-time">0:00</span>
+            <span class="duration">3:45</span>
+        </div>
+        
+        <div class="controls">
+            <button class="control-btn prev-btn">⏮</button>
+            <button class="control-btn play-btn">▶</button>
+            <button class="control-btn next-btn">⏭</button>
+        </div>
+        
+        <div class="playlist">
+            <div class="playlist-item active" data-src="https://files.catbox.moe/ot8bnb.mp3">
+                Soda Pop
+            </div>
+            <div class="playlist-item" data-src="https://files.catbox.moe/syd2p6.mp3">
+                Idol
+            </div>
+            <div class="playlist-item" data-src="https://files.catbox.moe/d8zokn.mp3">
+                Bilng Bang Bang Born
+            </div>
+        </div>
+    </div>
+    
+    <audio id="audio"></audio>
+    
+    <script>
+        const audio = document.getElementById('audio');
+        const playBtn = document.querySelector('.play-btn');
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+        const progressBar = document.querySelector('.progress-bar');
+        const progressContainer = document.querySelector('.progress-container');
+        const currentTimeEl = document.querySelector('.current-time');
+        const durationEl = document.querySelector('.duration');
+        const coverArt = document.querySelector('.cover-art');
+        const musicPlayer = document.querySelector('.music-player');
+        const playlistItems = document.querySelectorAll('.playlist-item');
+        const songTitle = document.querySelector('.song-title');
+        const artist = document.querySelector('.artist');
+        
+        // Daftar lagu (bisa diganti dengan lagu anime favorit)
+        const songs = [
+            {
+                title: "Soda Pop",
+                artist: "Saja Boys",
+                cover: "https://files.catbox.moe/lwjny6.jpg",
+                src: "https://files.catbox.moe/ot8bnb.mp3"
+            },
+            {
+                title: "Idol",
+                artist: "Yoasobi",
+                cover: "https://files.catbox.moe/48e5vn.jpg",
+                src: "https://files.catbox.moe/syd2p6.mp3"
+            },
+            {
+                title: "Bilng Bang Bang Born",
+                artist: "Mashle",
+                cover: "https://files.catbox.moe/ez46x4.jpg",
+                src: "https://files.catbox.moe/d8zokn.mp3"
+            }
+        ];
+        
+        let currentSongIndex = 0;
+        let isPlaying = false;
+        
+        // Memuat lagu
+        function loadSong(song) {
+            songTitle.textContent = song.title;
+            artist.textContent = song.artist;
+            coverArt.src = song.cover;
+            audio.src = song.src;
+        }
+        
+        // Memutar lagu
+        function playSong() {
+            isPlaying = true;
+            playBtn.textContent = '⏸';
+            musicPlayer.classList.add('playing');
+            audio.play();
+        }
+        
+        // Menghentikan lagu
+        function pauseSong() {
+            isPlaying = false;
+            playBtn.textContent = '▶';
+            musicPlayer.classList.remove('playing');
+            audio.pause();
+        }
+        
+        // Lagu sebelumnya
+        function prevSong() {
+            currentSongIndex--;
+            if (currentSongIndex < 0) {
+                currentSongIndex = songs.length - 1;
+            }
+            loadSong(songs[currentSongIndex]);
+            updatePlaylistActive();
+            playSong();
+        }
+        
+        // Lagu berikutnya
+        function nextSong() {
+            currentSongIndex++;
+            if (currentSongIndex > songs.length - 1) {
+                currentSongIndex = 0;
+            }
+            loadSong(songs[currentSongIndex]);
+            updatePlaylistActive();
+            playSong();
+        }
+        
+        // Update progress bar
+        function updateProgress(e) {
+            const { duration, currentTime } = e.srcElement;
+            const progressPercent = (currentTime / duration) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+            
+            // Format waktu
+            const durationMinutes = Math.floor(duration / 60);
+            let durationSeconds = Math.floor(duration % 60);
+            if (durationSeconds < 10) {
+                durationSeconds = `0${durationSeconds}`;
+            }
+            
+            const currentMinutes = Math.floor(currentTime / 60);
+            let currentSeconds = Math.floor(currentTime % 60);
+            if (currentSeconds < 10) {
+                currentSeconds = `0${currentSeconds}`;
+            }
+            
+            // Menghindari NaN
+            if (durationSeconds) {
+                durationEl.textContent = `${durationMinutes}:${durationSeconds}`;
+                currentTimeEl.textContent = `${currentMinutes}:${currentSeconds}`;
+            }
+        }
+        
+        // Set progress bar
+        function setProgress(e) {
+            const width = this.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        }
+        
+        // Update playlist active item
+        function updatePlaylistActive() {
+            playlistItems.forEach(item => item.classList.remove('active'));
+            playlistItems[currentSongIndex].classList.add('active');
+        }
+        
+        // Memilih lagu dari playlist
+        function selectSongFromPlaylist(e) {
+            const selectedIndex = Array.from(playlistItems).indexOf(e.target);
+            if (selectedIndex !== -1) {
+                currentSongIndex = selectedIndex;
+                loadSong(songs[currentSongIndex]);
+                updatePlaylistActive();
+                playSong();
+            }
+        }
+        
+        // Event listeners
+        playBtn.addEventListener('click', () => {
+            isPlaying ? pauseSong() : playSong();
+        });
+        
+        prevBtn.addEventListener('click', prevSong);
+        nextBtn.addEventListener('click', nextSong);
+        
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('ended', nextSong);
+        
+        progressContainer.addEventListener('click', setProgress);
+        
+        playlistItems.forEach(item => {
+            item.addEventListener('click', selectSongFromPlaylist);
+        });
+        
+        // Memuat lagu pertama saat halaman dimuat
+        loadSong(songs[currentSongIndex]);
+    </script>
+</body>
+</html>
