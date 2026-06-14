@@ -268,39 +268,12 @@
 
         // iklan
         loadSong(songs[currentSongIndex]);
-        const notif = document.getElementById('notif');
-
-const notifTexts = [
-    "🎵 Selamat Datang di Rizz.Music Player",
-    "🔥 Jangan lupa pilih lagu favoritmu",
-    "🎧 Nikmati musik dengan kualitas terbaik",
-    "💚 Terima kasih telah menggunakan Rizz.Music",
-    "🎶 Playlist siap menemani harimu"
-];
-
-let notifIndex = 0;
-
-function showNotification() {
-    notif.textContent = notifTexts[notifIndex];
-    notif.style.display = "block";
-
-    setTimeout(() => {
-        notif.style.opacity = "1";
-    }, 10);
-
-    setTimeout(() => {
-        notif.style.opacity = "0";
-
         setTimeout(() => {
-            notif.style.display = "none";
-        }, 500);
-    }, 3000);
-
-    notifIndex = (notifIndex + 1) % notifTexts.length;
-}
-
-showNotification();
-setInterval(showNotification, 10000);
+    const notif = document.querySelector('.notification');
+    notif.style.transition = '0.5s';
+    notif.style.opacity = '0';
+    setTimeout(() => notif.remove(), 500);
+}, 5000););
         
         // Memutar lagu
         function playSong() {
